@@ -3,14 +3,14 @@
   apt:
     state: latest
     pkg:
-      - mariadb-server
+      - mysql-server
       - python-mysqldb
       - automysqlbackup
 
 - name: Change MySQL charset to prevent MySQL error 1709
   template:
     src: templates/60-charset.cnf
-    dest: /etc/mysql/mariadb.conf.d/60-charset.cnf
+    dest: /etc/mysql/mysql.conf.d/60-charset.cnf
   when: ansible_distribution_major_version|int > 15
   notify: restart mysql
 
