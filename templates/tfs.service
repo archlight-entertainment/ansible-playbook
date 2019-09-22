@@ -1,0 +1,12 @@
+[Unit]
+Description=The Forgotten Server
+After=network.target mysql.service
+
+[Service]
+Type=simple
+ExecStart=/home/arch/srv/build/tfs
+WorkingDirectory=/home/arch/srv
+Restart=always
+
+[Install]
+WantedBy=default.target

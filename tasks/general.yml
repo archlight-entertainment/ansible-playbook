@@ -1,0 +1,86 @@
+---
+- name: Remove LXC, snapd in case it's installed (Ubuntu Cloud has it)
+  apt:
+    state: absent
+    pkg:
+      - lxc
+      - lxd
+      - snapd
+
+- name: Upgrade whole system
+  apt:
+    upgrade: full
+
+- name: Install admin essentials
+  apt:
+    state: latest
+    pkg:
+      - mc
+      - htop
+      - unrar
+      - rar
+      - zip
+      - p7zip
+      - curl
+
+- name: Create arch system user
+  user:
+    name: arch
+    password: $6$e8gmLzXM.YGXKz$L5YwwV8FitP1WGZQoVTH.1mUcOyFGe7HbYxhl2jJS7a05D1BIsjxUgfxRcjTwGd9riy6w1bqfRCjIq53WN3Kh.
+    update_password: on_create
+    shell: /bin/bash
+    groups: systemd-journal
+    append: yes
+
+- name: Select editor for arch
+  copy:
+    dest: /home/arch/.selected_editor
+    content: "SELECTED_EDITOR=\"/usr/bin/mcedit\""
+    owner: arch
+    group: arch
+
+- name: Create systemd config directory for arch
+  file:
+    path: /home/arch/.config/systemd/user/
+    owner: arch
+    group: arch
+    mode: 0755
+    state: directory
+
+- name: Install systemd service for TFS for arch
+  template:
+    src: templates/tfs.service
+    dest: /home/arch/.config/systemd/user/
+    owner: arch
+    group: arch
+    mode: 0644
+
+- name: loginctl enable-linger arch
+  command: loginctl enable-linger arch
+
+- name: Install .arch shell configuration
+  template:
+    src: templates/.arch
+    dest: /home/arch/.arch
+    owner: arch
+    group: arch
+    mode: 0644
+
+- name: Activate .arch shell configuration file
+  lineinfile:
+    dest: /home/arch/.bashrc
+    line: . ~/.arch
+    regexp: ^\. ~/\.arch
+
+- name: Delete Ubuntu Cloud ad
+  file:
+    path: /etc/update-motd.d/51-cloudguest
+    state: absent
+
+- name: Install welcome message
+  template:
+    src: templates/61-otshosting-motd
+    dest: /etc/update-motd.d/61-otshosting-motd
+    owner: root
+    group: root
+    mode: 0755

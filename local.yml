@@ -1,0 +1,35 @@
+---
+- hosts: all
+  handlers:
+    - name: reload systemd
+      command: /bin/systemctl daemon-reload
+
+    - name: restart systemd-journald
+      service:
+        name: systemd-journald
+        state: restarted
+
+    - name: restart mysql
+      service:
+        name: mysql
+        state: restarted
+
+  tasks:
+    - name: Fail if not running on Ubuntu
+      fail: msg="This playbook only works on Ubuntu systems!"
+      when: ansible_distribution != 'Ubuntu'
+      tags: default
+
+    - name: Fail if Ubuntu older than 15.04
+      fail: msg="This playbook requires Ubuntu >= 15.04"
+      when: ansible_distribution_major_version|int < 15
+      tags: default
+
+    - include: tasks/systemd.yml
+      tags: default
+
+    - include: tasks/general.yml
+      tags: default
+
+    - include: tasks/mysql.yml
+      tags: default
