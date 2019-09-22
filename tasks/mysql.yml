@@ -28,4 +28,4 @@
   file:
     path: /var/lib/automysqlbackup
     state: directory
-    group: manager
+    group: arch
