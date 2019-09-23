@@ -20,9 +20,40 @@
     state: restarted
     enabled: true
 
+- name: Generate random MySQL root password
+  command: openssl rand -base64 18
+  register: randompass
+
 - name: Check hostname
   command: hostname -f
   register: realhostname
+
+- name: Delete MySQL root accounts we don't want
+  mysql_user:
+    name: root
+    host: "{{item}}"
+    state: absent
+    check_implicit_admin: yes
+  with_items:
+    - 127.0.0.1
+    - ::1
+    - realhostname.stdout
+    - "%"
+
+- name: Ensure anonymous MySQL users are not in the database
+  mysql_user:
+    name: ""
+    host: "{{item}}"
+    state: absent
+    check_implicit_admin: yes
+  with_items:
+    - localhost
+    - 127.0.0.1
+
+- name: Delete MySQL test database
+  mysql_db:
+    name: test
+    state: absent
 
 - name: Allow arch to access automysqlbackup directory
   file:
