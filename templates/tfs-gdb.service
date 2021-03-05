@@ -3,10 +3,11 @@ Description=The Forgotten Server
 After=network.target
 Wants=network-online.target mysql.service
 After=network-online.target mysql.service
+Conflicts=tfs.service
 
 [Service]
 Type=simple
-ExecStart=/home/arch/srv/build/tfs
+ExecStart=/usr/bin/gdb -q -batch -ex "handle SIGTERM nostop pass" -ex "handle SIGINT nostop pass" -ex "handle SIGHUP nostop pass" -ex "handle SIGUSR1 nostop pass" -ex "run" -ex "thread apply all backtrace" /home/arch/srv/build/tfs
 WorkingDirectory=/home/arch/srv
 User=arch
 Group=arch

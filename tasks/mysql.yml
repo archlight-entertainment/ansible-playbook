@@ -4,7 +4,7 @@
     state: latest
     pkg:
       - mysql-server
-      - python-mysqldb
+      - python3-mysqldb
       - automysqlbackup
 
 - name: Change MySQL charset to prevent MySQL error 1709
@@ -20,9 +20,41 @@
     state: restarted
     enabled: true
 
-- name: Generate random MySQL root password
+- name: Parse existing .my.cnf
+  shell: grep -s pass /home/arch/.my.cnf | sed 's/password=//'
+  register: existingpass
+
+- name: Generate random MySQL arch password
   command: openssl rand -base64 18
   register: randompass
+  when: not existingpass.stdout
+
+- set_fact:
+    mysql_arch_pass: "{{ randompass.stdout if randompass is not skipped else existingpass.stdout }}"
+
+- name: Set MySQL arch password (localhost)
+  mysql_user:
+    name: arch
+    password: "{{ mysql_arch_pass }}"
+    host: localhost
+    priv: "*.*:ALL,GRANT"
+    check_implicit_admin: yes
+
+- name: Save MySQL arch password
+  template:
+    src: .my.cnf
+    dest: /home/arch/.my.cnf
+    owner: arch
+    group: arch
+    mode: 0600
+
+- name: Set MySQL arch password (%)
+  mysql_user:
+    name: arch
+    password: "{{ mysql_arch_pass }}"
+    host: "%"
+    priv: "*.*:ALL,GRANT"
+    check_implicit_admin: yes
 
 - name: Check hostname
   command: hostname -f
@@ -43,12 +75,9 @@
 - name: Ensure anonymous MySQL users are not in the database
   mysql_user:
     name: ""
-    host: "{{item}}"
+    host_all: yes
     state: absent
     check_implicit_admin: yes
-  with_items:
-    - localhost
-    - 127.0.0.1
 
 - name: Delete MySQL test database
   mysql_db:

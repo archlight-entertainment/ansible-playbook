@@ -22,6 +22,8 @@
       - zip
       - p7zip
       - curl
+      - systemd-coredump
+      - gdb
 
 - name: Create arch system user
   user:
@@ -38,25 +40,6 @@
     content: "SELECTED_EDITOR=\"/usr/bin/mcedit\""
     owner: arch
     group: arch
-
-- name: Create systemd config directory for arch
-  file:
-    path: /home/arch/.config/systemd/user/
-    owner: arch
-    group: arch
-    mode: 0755
-    state: directory
-
-- name: Install systemd service for TFS for arch
-  template:
-    src: templates/tfs.service
-    dest: /home/arch/.config/systemd/user/
-    owner: arch
-    group: arch
-    mode: 0644
-
-- name: loginctl enable-linger arch
-  command: loginctl enable-linger arch
 
 - name: Install .arch shell configuration
   template:

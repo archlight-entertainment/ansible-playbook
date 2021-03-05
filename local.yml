@@ -16,20 +16,33 @@
 
   tasks:
     - name: Fail if not running on Ubuntu
-      fail: msg="This playbook only works on Ubuntu systems!"
+      fail:
+        msg: This playbook only works on Ubuntu systems!
       when: ansible_distribution != 'Ubuntu'
-      tags: default
+      tags: always
 
-    - name: Fail if Ubuntu older than 15.04
-      fail: msg="This playbook requires Ubuntu >= 15.04"
-      when: ansible_distribution_major_version|int < 15
-      tags: default
+    - name: Fail if Ubuntu older than 20.04
+      fail:
+        msg: This playbook requires Ubuntu >= 20.04
+      when: ansible_distribution_major_version|int < 20
+      tags: always
 
     - include: tasks/systemd.yml
-      tags: default
+      tags:
+        - default
+        - systemd
 
     - include: tasks/general.yml
-      tags: default
+      tags:
+        - default
+        - general
 
     - include: tasks/mysql.yml
-      tags: default
+      tags:
+        - default
+        - mysql
+
+    - include: tasks/tfs.yml
+      tags:
+        - default
+        - tfs
