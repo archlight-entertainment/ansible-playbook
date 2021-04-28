@@ -6,7 +6,7 @@ After=network-online.target mysql.service
 
 [Service]
 Type=simple
-ExecStart=/home/arch/srv/build/tfs
+ExecStart=/home/arch/srv/restarter.sh
 WorkingDirectory=/home/arch/srv
 User=arch
 Group=arch

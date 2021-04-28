@@ -22,4 +22,3 @@
     dest: /etc/systemd/system/{{item}}
   with_items:
     - tfs.service
-    - tfs-gdb.service
